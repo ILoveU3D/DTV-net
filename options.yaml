@@ -1,0 +1,44 @@
+# Datasets and Model
+# train/valid Data Path
+dataPath: /media/wyk/wyk/Data/raws
+subDir:
+  train: trainData
+  valid: validData
+  trainInput: inputTrainData
+  validInput: inputValidData
+# pretrain
+pretrain: /home/nanovision/wyk/data/checkpoints/dtvnet_5031.7706865298.dict
+# checkpoint
+checkpointPath: /home/nanovision/wyk/data/checkpoints/
+# debug
+debug: /home/nanovision/wyk/data/debug/
+
+# standard geometry parameters
+# angles' num
+standardAngleNum: 48
+# size of detector
+standardDetectorSize:
+  - 288
+  - 28
+# size of volume
+standardVolumeSize:
+  - 256
+  - 256
+  - 64
+# SID and SOD
+standardSID: 1000
+standardSDD: 2000
+
+# beijing geometry parameters
+beijingAngleNum: 360
+beijingPlanes: 64
+beijingSubDetectorSize:
+  - 40
+  - 72
+beijingVolumeSize:
+  - 256
+  - 256
+  - 64
+beijingParameterRoot: /media/wyk/wyk/beijing/projVec.mat
+beijingSID: 708
+beijingSDD: 1143
