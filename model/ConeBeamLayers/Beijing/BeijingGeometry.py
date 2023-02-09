@@ -52,36 +52,29 @@ class BeijingGeometryWithFBP(torch.nn.Module):
         super(BeijingGeometryWithFBP, self).__init__()
         self.lamb = torch.nn.Parameter(torch.tensor(1.0), requires_grad=False)
         self.cosWeight = torch.nn.Parameter(self.__cosWeight__(),requires_grad=False)
-        # self.ramp = torch.nn.Parameter(self.__filter__(), requires_grad=False)
-        self.ramp = torch.nn.Parameter(self.__conv__(detectorSize[0]), requires_grad=False)
+        self.ramp = torch.nn.Parameter(self.__conv__(beijingSubDetectorSize[0]*beijingPlanes), requires_grad=False)
 
     def forward(self, x, p):
         residual = ForwardProjection.apply(x) - p
+        residual = residual.view(1, 1, beijingAngleNum, beijingSubDetectorSize[1], beijingSubDetectorSize[0]*beijingPlanes)
         residual = residual * self.cosWeight
-        # --* frequency domain filtering *--
-        # residual = torch.fft.fft(residual, norm="forward")
-        # residual = residual * self.ramp
-        # residual = torch.fft.ifft(residual, norm="backward")
-        # residual = torch.real(residual).contiguous()
-        # --* space domain convolution *--
-        b, c, a, h, w = residual.size()
-        residual = residual.view(b, c, a * h, w)
-        residual = torch.nn.functional.conv2d(residual, self.ramp, stride=1, padding=(0, int(detectorSize[0]/2)))
-        residual = residual.view(b, c, a, h, w)
-        return self.lamb * BackProjection.apply(residual)
+        residual = residual.view(1, 1, beijingAngleNum * beijingSubDetectorSize[1], beijingSubDetectorSize[0]*beijingPlanes)
+        residual = torch.nn.functional.conv2d(residual, self.ramp, stride=1, padding=(0, int(beijingSubDetectorSize[0]*beijingPlanes/2)))
+        residual = residual.view(1, 1, beijingAngleNum*beijingPlanes, beijingSubDetectorSize[1], beijingSubDetectorSize[0])
+        return x - self.lamb * BackProjection.apply(residual)
 
     def __cosWeight__(self):
-        cosine = np.zeros([1,1,standardAngleNum,detectorSize[1],detectorSize[0]], dtype=np.float32)
-        mid = np.array(detectorSize) / 2
-        for i in range(detectorSize[1]):
-            for j in range(detectorSize[0]):
-                cosine[...,i,j] = standardSDD / np.sqrt(standardSDD**2 + (i-mid[1])**2 + (j-mid[0])**2)
+        cosine = np.zeros([1,1,beijingAngleNum,beijingSubDetectorSize[1],beijingSubDetectorSize[0]*beijingPlanes], dtype=np.float32)
+        mid = np.array([beijingSubDetectorSize[1],beijingSubDetectorSize[0]*beijingPlanes]) / 2
+        for i in range(beijingSubDetectorSize[1]):
+            for j in range(beijingSubDetectorSize[0]*beijingPlanes):
+                cosine[...,i,j] = beijingSDD / np.sqrt(beijingSDD**2 + (i-mid[1])**2 + (j-mid[0])**2)
         return torch.from_numpy(cosine)
 
     def __filter__(self):
-        filter = np.zeros([1, 1, standardAngleNum, detectorSize[1], detectorSize[0]], dtype=np.float32)
-        mid = detectorSize[0] / 2
-        for i in range(detectorSize[0]):
+        filter = np.zeros([1, 1, standardAngleNum, beijingSubDetectorSize[1], beijingSubDetectorSize[0]], dtype=np.float32)
+        mid = beijingSubDetectorSize[0] / 2
+        for i in range(beijingSubDetectorSize[0]):
             filter[...,i] = mid - np.abs(i - mid)
         return torch.from_numpy(filter)
 

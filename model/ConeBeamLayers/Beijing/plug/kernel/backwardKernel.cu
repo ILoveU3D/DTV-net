@@ -32,11 +32,11 @@ __global__ void backwardKernel(float* volume, const uint3 volumeSize, const uint
             float fScale = __fdividef(1.0f, det3(u, v, sourcePosition-coordinates));
             float detectorX = fScale * det3(coordinates-sourcePosition,v,sourcePosition-detectorPosition)-detectorCenter.x;
             float detectorY = fScale * det3(u, coordinates-sourcePosition,sourcePosition-detectorPosition)-detectorCenter.y;
-            float fr = fScale * det3(u, v, sourcePosition);
-            value += fr * fr * tex3D(sinoTexture, detectorX, detectorY, angleIdx+0.5f);
+            float fr = fScale * det3(u, v, sourcePosition) * 10;
+            value += fr * tex3D(sinoTexture, detectorX, detectorY, angleIdx+0.5f);
         }
         int idx = k * volumeSize.x * volumeSize.y + volumeIdx.y * volumeSize.x + volumeIdx.x;
-        volume[idx] += value * 2 * PI / anglesNum;
+        volume[idx] += value * PI / anglesNum;
     }
 }
 
@@ -90,7 +90,7 @@ torch::Tensor backward(torch::Tensor sino, torch::Tensor _volumeSize, torch::Ten
         printf("thread:(%d %d %d)\n",blockSize.x,blockSize.y,blockSize.z);
         printf("block:(%d %d %d)\n",gridSize.x,gridSize.y,gridSize.z);
         for (int angle = 0; angle < angles; angle+=BLOCK_A){
-           backwardKernel<<<gridSize, blockSize>>>(outPtrPitch, volumeSize, detectorSize, (float*)projectVector.data<float>(), angle,angles,volumeCenter,detectorCenter);
+           backwardKernel<<<gridSize, blockSize>>>(outPtrPitch, volumeSize, detectorSize, (float*)projectVector.data<float>(), angle,angles/64,volumeCenter,detectorCenter);
         }
 
       // 解绑纹理
