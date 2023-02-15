@@ -1,18 +1,32 @@
+import os
+import time
+import tqdm
 import torch
 import numpy as np
 from model.ConeBeamLayers.Beijing.BeijingGeometry import BeijingGeometryWithFBP, BeijingGeometry, ForwardProjection, BackProjection
 from model.FISTA.DTVFISTA import DTVFista
-from options import trainPath, outputPath
+from options import trainPath, validPath, outputPath
 
-# data = np.fromfile(trainPath + "/pa_1.raw", dtype="float32")
-data = np.fromfile("/media/wyk/wyk/Data/raws/SheppLogan.raw", dtype="float32")
+data = np.fromfile(trainPath + "/pa_1.raw", dtype="float32")
+# data = np.fromfile("/media/wyk/wyk/Data/raws/SheppLogan.raw", dtype="float32")
 data = np.reshape(data, [1,1,64,256,256])
 data = torch.from_numpy(data).cuda()
 projection = ForwardProjection.apply(data)
 projection.detach().cpu().numpy().tofile(outputPath)
 print("projected")
-net = BeijingGeometryWithFBP().cuda().eval()
-volume = net(torch.zeros_like(data), projection)
-print("infered")
+net = BeijingGeometry().cuda().eval()
+net.lamb = 10e-5
 
-volume.detach().cpu().numpy().tofile(outputPath)
+targetPath = "/media/wyk/wyk/Data/raws/inputValidData"
+for item in os.listdir(validPath):
+    data = np.fromfile(os.path.join(validPath, item), dtype="float32")
+    data = np.reshape(data, [1, 1, 64, 256, 256])
+    data = torch.from_numpy(data).cuda()
+    projection = ForwardProjection.apply(data)
+    volume = torch.zeros_like(data).cuda()
+    for i in tqdm.trange(100):
+        volume = net(volume, projection)
+    volume.detach().cpu().numpy().tofile(os.path.join(targetPath, item))
+    print("infered: {}".format(item))
+
+# volume.detach().cpu().numpy().tofile(outputPath)

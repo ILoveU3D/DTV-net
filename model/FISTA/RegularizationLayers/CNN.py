@@ -28,4 +28,4 @@ class Dual(nn.Module):
     def forward(self, image, lamb):
         x = self.encoder(image)
         out = torch.sign(x) * nn.functional.relu(torch.abs(x) - nn.functional.relu(lamb))
-        return self.decoder(out), nn.functional.l1_loss(x, torch.zeros_like(x))
+        return image + self.decoder(out), nn.functional.l1_loss(x, torch.zeros_like(x))

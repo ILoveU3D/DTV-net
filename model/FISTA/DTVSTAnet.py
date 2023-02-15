@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from model.ConeBeamLayers.Standard.StandardGeometry import StandardGeometryWithFBP
+from model.ConeBeamLayers.Beijing.BeijingGeometry import BeijingGeometry
 from model.PDHG.Utils.Gradients import spraseMatrixX, spraseMatrixY, spraseMatrixZ
 from model.FISTA.RegularizationLayers.CNN import Dual
 
@@ -9,7 +9,7 @@ class DTVNet(nn.Module):
     def __init__(self, volumeSize, cascades: int = 3):
         super(DTVNet, self).__init__()
         self.cascades = cascades
-        self.ITE = StandardGeometryWithFBP()
+        self.ITE = BeijingGeometry()
         self.AE = nn.ModuleList([Dual()] * 4)
         self.dx, self.dxt, normDx = spraseMatrixX(volumeSize)
         self.dx, self.dxt = nn.Parameter(self.dx, requires_grad=False), nn.Parameter(self.dxt, requires_grad=False)
@@ -33,7 +33,7 @@ class DTVNet(nn.Module):
             pnew, _ = self.AE[0](pnew, self.sigma[0])
             qnew, _ = self.AE[1](qnew, self.sigma[1])
             snew, _ = self.AE[2](snew, self.sigma[2])
-            znew, _ = self.AE[3](t[cascade] - z, self.sigma[3])
+            znew, _ = self.AE[3](z, self.sigma[3])
             p = pnew + self.nt[cascade] * (pnew - p)
             q = qnew + self.nt[cascade] * (qnew - q)
             s = snew + self.nt[cascade] * (snew - s)

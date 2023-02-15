@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 from torch.utils.data import DataLoader
-from data.trainDataLoader import Stimulated256
+from data.simulateLoader import Stimulated256
 from model.FISTA.RegularizationLayers.RED import Red
 from options import trainPath, validPath
 from loss import draw

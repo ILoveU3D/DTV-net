@@ -1,6 +1,6 @@
 # Datasets and Model
 # train/valid Data Path
-dataPath: /media/wyk/wyk/Data/raws
+dataPath: /home/nanovision/wyk/data
 subDir:
   train: trainData
   valid: validData
@@ -30,7 +30,7 @@ standardSID: 1000
 standardSDD: 2000
 
 # beijing geometry parameters
-beijingAngleNum: 360
+beijingAngleNum: 72
 beijingPlanes: 64
 beijingSubDetectorSize:
   - 40
@@ -39,6 +39,6 @@ beijingVolumeSize:
   - 256
   - 256
   - 64
-beijingParameterRoot: /media/wyk/wyk/beijing/projVec.mat
+beijingParameterRoot: /home/nanovision/wyk/data/projVecSparse.mat
 beijingSID: 708
 beijingSDD: 1143

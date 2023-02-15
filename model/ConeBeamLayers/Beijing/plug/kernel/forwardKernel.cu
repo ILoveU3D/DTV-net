@@ -123,8 +123,6 @@ torch::Tensor forward(torch::Tensor volume, torch::Tensor _volumeSize, torch::Te
         // 以角度为单位做探测器像素驱动的正投影
         const dim3 blockSize = dim3(BLOCK_X, BLOCK_Y, 1);
         const dim3 gridSize = dim3(detectorSize.x / BLOCK_X + 1, detectorSize.y / BLOCK_Y + 1, 1);
-        printf("thread:(%d %d %d)\n",blockSize.x,blockSize.y,blockSize.z);
-        printf("block:(%d %d %d)\n",gridSize.x,gridSize.y,gridSize.z);
         for (int angle = 0; angle < angles; angle++){
            forwardKernel<<<gridSize, blockSize>>>(outPtrPitch, volumeSize, volumeCenter, detectorSize, detectorCenter, (float*)projectVector.data<float>(), angle);
         }

@@ -5,7 +5,7 @@ import JITBeijingGeometry as projector
 from options import *
 
 parameters = sco.loadmat(beijingParameterRoot)
-parameters = np.array(parameters["projection_matrix"]).astype(np.float32)
+parameters = np.array(parameters["projVec"]).astype(np.float32)
 parameters = torch.from_numpy(parameters).contiguous()
 volumeSize = torch.IntTensor(beijingVolumeSize)
 detectorSize = torch.IntTensor(beijingSubDetectorSize)
@@ -41,7 +41,7 @@ class BackProjection(torch.autograd.Function):
 class BeijingGeometry(torch.nn.Module):
     def __init__(self):
         super(BeijingGeometry, self).__init__()
-        self.lamb = 1.0
+        self.lamb = torch.nn.Parameter(torch.tensor(10e-5), requires_grad=False)
 
     def forward(self, x, p):
         residual = ForwardProjection.apply(x) - p
@@ -70,13 +70,6 @@ class BeijingGeometryWithFBP(torch.nn.Module):
             for j in range(beijingSubDetectorSize[0]*beijingPlanes):
                 cosine[...,i,j] = beijingSDD / np.sqrt(beijingSDD**2 + (i-mid[1])**2 + (j-mid[0])**2)
         return torch.from_numpy(cosine)
-
-    def __filter__(self):
-        filter = np.zeros([1, 1, standardAngleNum, beijingSubDetectorSize[1], beijingSubDetectorSize[0]], dtype=np.float32)
-        mid = beijingSubDetectorSize[0] / 2
-        for i in range(beijingSubDetectorSize[0]):
-            filter[...,i] = mid - np.abs(i - mid)
-        return torch.from_numpy(filter)
 
     def __conv__(self, projWidth):
         filter = np.ones([1,1,1,projWidth+1], dtype=np.float32)

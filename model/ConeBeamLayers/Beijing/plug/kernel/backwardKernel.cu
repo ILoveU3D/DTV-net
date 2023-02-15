@@ -5,7 +5,7 @@
 
 #define BLOCK_X 16
 #define BLOCK_Y 16
-#define BLOCK_A 360
+#define BLOCK_A 32
 #define PI 3.14159265359
 #define CHECK_CUDA(x) AT_ASSERTM(x.type().is_cuda(), #x " must be a CUDA tensor")
 #define CHECK_CONTIGUOUS(x) AT_ASSERTM(x.is_contiguous(), #x " must be contiguous")
@@ -87,8 +87,6 @@ torch::Tensor backward(torch::Tensor sino, torch::Tensor _volumeSize, torch::Ten
         // 以角度为单位做体素驱动的反投影
         const dim3 blockSize = dim3(BLOCK_X, BLOCK_Y, 1);
         const dim3 gridSize = dim3(volumeSize.x / BLOCK_X + 1, volumeSize.y / BLOCK_Y + 1, 1);
-        printf("thread:(%d %d %d)\n",blockSize.x,blockSize.y,blockSize.z);
-        printf("block:(%d %d %d)\n",gridSize.x,gridSize.y,gridSize.z);
         for (int angle = 0; angle < angles; angle+=BLOCK_A){
            backwardKernel<<<gridSize, blockSize>>>(outPtrPitch, volumeSize, detectorSize, (float*)projectVector.data<float>(), angle,angles/64,volumeCenter,detectorCenter);
         }

@@ -2,15 +2,15 @@ import numpy as np
 import torch
 from tqdm import tqdm
 from torch.utils.data import DataLoader
-from data.trainDataLoader import Stimulated256
+from data.simulateLoader import Stimulated256Input
 from model.FISTA.DTVSTAnet import DTVNet
 from model.FISTA.RegularizationLayers.RED import Red
-from options import trainPath, validPath, checkpointPath, debugPath, pretrain
+from options import trainPath, inputTrainData, validPath, inputValidData, checkpointPath, debugPath, pretrain
 from loss import draw
 from loss import perceptualLossCal as lossFunction
 
-trainSet = Stimulated256(trainPath)
-validSet = Stimulated256(validPath)
+trainSet = Stimulated256Input(trainPath, inputTrainData)
+validSet = Stimulated256Input(validPath, inputValidData)
 trainLoader = DataLoader(trainSet, batch_size=1, shuffle=True)
 validLoader = DataLoader(validSet, batch_size=1, shuffle=False)
 
