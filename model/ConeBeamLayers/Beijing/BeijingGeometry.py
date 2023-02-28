@@ -41,7 +41,7 @@ class BackProjection(torch.autograd.Function):
 class BeijingGeometry(torch.nn.Module):
     def __init__(self):
         super(BeijingGeometry, self).__init__()
-        self.lamb = torch.nn.Parameter(torch.tensor(10e-5), requires_grad=False)
+        self.lamb = torch.nn.Parameter(torch.tensor(10e-2), requires_grad=False)
 
     def forward(self, x, p):
         residual = ForwardProjection.apply(x) - p

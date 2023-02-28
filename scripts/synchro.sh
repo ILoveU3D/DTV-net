@@ -1,1 +1,1 @@
-scp -r /media/wyk/wyk/Recon/DTV-net-LTS/ 44e7571769a449b7a6fdf03ee6269118@ssh.axisapps.io:/home/nanovision/wyk
+scp -r /media/wyk/wyk/Recon/DTV-net-LTS/ b1655e89c76c42c2be8650dcf53d5d49@ssh.axisapps.io:/home/nanovision/wyk

@@ -14,19 +14,20 @@ data = torch.from_numpy(data).cuda()
 projection = ForwardProjection.apply(data)
 projection.detach().cpu().numpy().tofile(outputPath)
 print("projected")
-net = BeijingGeometry().cuda().eval()
-net.lamb = 10e-5
+net = BeijingGeometryWithFBP().cuda().eval()
+volume = torch.zeros_like(data).cuda()
+volume = net(volume, projection)
 
-targetPath = "/media/wyk/wyk/Data/raws/inputValidData"
-for item in os.listdir(validPath):
-    data = np.fromfile(os.path.join(validPath, item), dtype="float32")
-    data = np.reshape(data, [1, 1, 64, 256, 256])
-    data = torch.from_numpy(data).cuda()
-    projection = ForwardProjection.apply(data)
-    volume = torch.zeros_like(data).cuda()
-    for i in tqdm.trange(100):
-        volume = net(volume, projection)
-    volume.detach().cpu().numpy().tofile(os.path.join(targetPath, item))
-    print("infered: {}".format(item))
+# targetPath = "/media/wyk/wyk/Data/raws/inputTrainData"
+# for item in os.listdir(trainPath):
+#     data = np.fromfile(os.path.join(trainPath, item), dtype="float32")
+#     data = np.reshape(data, [1, 1, 64, 256, 256])
+#     data = torch.from_numpy(data).cuda()
+#     projection = ForwardProjection.apply(data)
+#     volume = torch.zeros_like(data).cuda()
+#     for i in tqdm.trange(1000):
+#         volume = net(volume, projection)
+#     volume.detach().cpu().numpy().tofile(os.path.join(targetPath, item))
+#     print("infered: {}".format(item))
 
-# volume.detach().cpu().numpy().tofile(outputPath)
+volume.detach().cpu().numpy().tofile(outputPath)

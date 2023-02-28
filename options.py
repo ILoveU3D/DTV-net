@@ -8,6 +8,7 @@ inputTrainData = os.path.join(y["dataPath"], y["subDir"]["trainInput"])
 inputValidData = os.path.join(y["dataPath"], y["subDir"]["validInput"])
 outputPath = os.path.join(y["dataPath"], "r.raw")
 pretrain = y["pretrain"]
+pretrain2 = y["pretrain2"]
 checkpointPath = y["checkpointPath"]
 debugPath = y["debug"]
 standardAngleNum = y["standardAngleNum"]

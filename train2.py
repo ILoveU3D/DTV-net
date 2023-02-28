@@ -5,20 +5,22 @@ from torch.utils.data import DataLoader
 from data.simulateLoader import Stimulated256Input
 from model.FISTA.DTVSTAnet import DTVNet
 from model.FISTA.RegularizationLayers.RED import Red
-from options import trainPath, inputTrainData, validPath, inputValidData, checkpointPath, debugPath, pretrain
+from options import trainPath, inputTrainData, validPath, inputValidData, checkpointPath, debugPath, pretrain2
 from loss import draw
 from loss import perceptualLossCal as lossFunction
+debugPath = "/home/nanovision/wyk/data/debug_red"
+l1Loss = torch.nn.L1Loss()
 
 trainSet = Stimulated256Input(trainPath, inputTrainData)
 validSet = Stimulated256Input(validPath, inputValidData)
 trainLoader = DataLoader(trainSet, batch_size=1, shuffle=True)
 validLoader = DataLoader(validSet, batch_size=1, shuffle=False)
 
-device = 3
+device = 4
 net = DTVNet((256,256,64),5).to(device)
 optimizer = torch.optim.Adam(net.parameters(), lr=10e-4)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.9)
-# dictionary = torch.load(pretrain)
+# dictionary = torch.load(pretrain2)
 # net.load_state_dict(dictionary["model"])
 # optimizer.load_state_dict(dictionary["optimizer"])
 # scheduler.load_state_dict(dictionary["scheduler"])
@@ -38,7 +40,7 @@ for i in range(epoch):
             if idx % 100 == 0:
                 draw(output, debugPath, label)
             optimizer.zero_grad()
-            loss = lossFunction(output[-1], label)
+            loss = l1Loss(output[-1], label)
             loss.backward()
             optimizer.step()
             trainLoss.append(loss.item())
@@ -59,4 +61,4 @@ for i in range(epoch):
     scheduler.step()
     if i%10==0: torch.save({
         "epoch": i, "model": net.state_dict(), "optimizer": optimizer.state_dict(), "scheduler": scheduler.state_dict()
-    }, "{}/dtvnet_p2_{:.10f}.dict".format(checkpointPath, np.mean(np.array(trainLoss))))
+    }, "{}/dtvnet_l1_{:.10f}.dict".format(checkpointPath, np.mean(np.array(trainLoss))))

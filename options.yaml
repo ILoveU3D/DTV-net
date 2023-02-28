@@ -7,7 +7,8 @@ subDir:
   trainInput: inputTrainData
   validInput: inputValidData
 # pretrain
-pretrain: /home/nanovision/wyk/data/checkpoints/dtvnet_5031.7706865298.dict
+pretrain: /home/nanovision/wyk/data/checkpoint_real/dtvnet_p2_8622.8757744417.dict
+pretrain2: /home/nanovision/wyk/data/checkpoint_real/dtvnet_l1_69.8972342913.dict
 # checkpoint
 checkpointPath: /home/nanovision/wyk/data/checkpoints/
 # debug

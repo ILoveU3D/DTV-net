@@ -4,13 +4,15 @@ import numpy as np
 from model.ConeBeamLayers.Beijing.BeijingGeometry import BeijingGeometry
 from model.PDHG.Utils.Gradients import spraseMatrixX, spraseMatrixY, spraseMatrixZ
 from model.FISTA.RegularizationLayers.CNN import Dual
+from model.FISTA.RegularizationLayers.NEG import Neg
 
 class DTVNet(nn.Module):
     def __init__(self, volumeSize, cascades: int = 3):
         super(DTVNet, self).__init__()
         self.cascades = cascades
         self.ITE = BeijingGeometry()
-        self.AE = nn.ModuleList([Dual()] * 4)
+        self.AE = nn.ModuleList([Dual(8), Dual(8), Dual(8), Dual(32)])
+        self.NG = nn.ModuleList([Neg(16), Neg(16)])
         self.dx, self.dxt, normDx = spraseMatrixX(volumeSize)
         self.dx, self.dxt = nn.Parameter(self.dx, requires_grad=False), nn.Parameter(self.dxt, requires_grad=False)
         self.dy, self.dyt, normDy = spraseMatrixY(volumeSize)
@@ -23,7 +25,7 @@ class DTVNet(nn.Module):
 
     def forward(self, image, sino):
         t = [torch.tensor(0)] * (self.cascades + 1)
-        t[0] = image
+        t[0] = self.NG[0](image)
         p = q = s = 0
         for cascade in range(self.cascades):
             z = self.ITE(t[cascade], sino)
@@ -34,13 +36,19 @@ class DTVNet(nn.Module):
             qnew, _ = self.AE[1](qnew, self.sigma[1])
             snew, _ = self.AE[2](snew, self.sigma[2])
             znew, _ = self.AE[3](z, self.sigma[3])
-            p = pnew + self.nt[cascade] * (pnew - p)
-            q = qnew + self.nt[cascade] * (qnew - q)
-            s = snew + self.nt[cascade] * (snew - s)
+            if cascade < len(self.nt.detach().cpu().numpy()):
+                p = pnew + self.nt[cascade] * (pnew - p)
+                q = qnew + self.nt[cascade] * (qnew - q)
+                s = snew + self.nt[cascade] * (snew - s)
+            else:
+                p = pnew
+                q = qnew
+                s = snew
             p_ = self.__getGradient(p, self.dxt)
             q_ = self.__getGradient(q, self.dyt)
             s_ = self.__getGradient(s, self.dzt)
-            t[cascade + 1] = p_ + q_ + s_ + znew
+            t[cascade + 1] = p_ + q_ + s_ + znew + t[cascade]
+        t[-1] = self.NG[1](t[-1])
         return t
 
     def __getGradient(self, image, sparse):

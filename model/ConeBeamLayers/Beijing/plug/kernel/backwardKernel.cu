@@ -5,7 +5,7 @@
 
 #define BLOCK_X 16
 #define BLOCK_Y 16
-#define BLOCK_A 32
+#define BLOCK_A 16
 #define PI 3.14159265359
 #define CHECK_CUDA(x) AT_ASSERTM(x.type().is_cuda(), #x " must be a CUDA tensor")
 #define CHECK_CONTIGUOUS(x) AT_ASSERTM(x.is_contiguous(), #x " must be contiguous")
@@ -32,11 +32,11 @@ __global__ void backwardKernel(float* volume, const uint3 volumeSize, const uint
             float fScale = __fdividef(1.0f, det3(u, v, sourcePosition-coordinates));
             float detectorX = fScale * det3(coordinates-sourcePosition,v,sourcePosition-detectorPosition)-detectorCenter.x;
             float detectorY = fScale * det3(u, coordinates-sourcePosition,sourcePosition-detectorPosition)-detectorCenter.y;
-            float fr = fScale * det3(u, v, sourcePosition) * 10;
-            value += fr * tex3D(sinoTexture, detectorX, detectorY, angleIdx+0.5f);
+            float fr = fScale * det3(u, v, sourcePosition-detectorPosition);
+            value += tex3D(sinoTexture, detectorX, detectorY, angleIdx+0.5f);
         }
         int idx = k * volumeSize.x * volumeSize.y + volumeIdx.y * volumeSize.x + volumeIdx.x;
-        volume[idx] += value * PI / anglesNum;
+        volume[idx] += value * 2 * PI / anglesNum;
     }
 }
 
