@@ -45,7 +45,7 @@ class BeijingGeometry(torch.nn.Module):
 
     def forward(self, x, p):
         residual = ForwardProjection.apply(x) - p
-        return x - self.lamb * BackProjection.apply(residual)
+        return -self.lamb * BackProjection.apply(residual)
 
 class BeijingGeometryWithFBP(torch.nn.Module):
     def __init__(self):
