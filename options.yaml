@@ -44,3 +44,14 @@ beijingVolumeSize:
 beijingParameterRoot: /media/wyk/wyk/beijing/projVecSparse.mat
 beijingSID: 708
 beijingSDD: 1143
+
+# shenzhen geometry parameters
+shenzhenAngleNum: 320
+shenzhenDetectorSize:
+  - 815
+  - 815
+shenzhenVolumeSize:
+  - 256
+  - 256
+  - 64
+shenzhenParameterRoot: /media/wyk/wyk/shenzhen/proj_vec.mat
