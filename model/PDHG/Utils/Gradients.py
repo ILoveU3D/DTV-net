@@ -51,10 +51,10 @@ def _init(N:int):
 def __getSpraseMatrix(row,col,data,N):
     i = torch.LongTensor([row, col])
     v = torch.FloatTensor(data)
-    D = torch.sparse.FloatTensor(i, v, (N,N))
+    D = torch.sparse.FloatTensor(i, v, (N,N)).cuda()
     i = torch.LongTensor([col, row])
     v = torch.FloatTensor(data)
-    DT = torch.sparse.FloatTensor(i, v, (N,N))
+    DT = torch.sparse.FloatTensor(i, v, (N,N)).cuda()
     matrix = csc_matrix((np.array(data), (np.array(row), np.array(col))), shape=(N, N))
     norm = power_method(matrix)
     matrixSet.append(matrix)

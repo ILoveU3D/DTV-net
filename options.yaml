@@ -41,6 +41,6 @@ beijingVolumeSize:
   - 256
   - 256
   - 64
-beijingParameterRoot: /home/nanovision/wyk/data/projVecSparse.mat
+beijingParameterRoot: /media/wyk/wyk/beijing/projVecSparse.mat
 beijingSID: 708
 beijingSDD: 1143
