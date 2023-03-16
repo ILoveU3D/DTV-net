@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from model.ConeBeamLayers.Beijing.BeijingGeometry import BeijingGeometry
-from model.FISTA.RegularizationLayers.CNN import Dual
+from model.FISTA.RegularizationLayers.BasicBlock import BasicBlock
 from model.FISTA.RegularizationLayers.NEG import Neg
 from options import debugPath
 
@@ -10,18 +10,15 @@ class FistaNet(nn.Module):
         super(FistaNet, self).__init__()
         self.cascades = cascades
         self.ITE = nn.ModuleList([BeijingGeometry()] * cascades)
-        self.AE = nn.ModuleList([Dual()] * cascades)
-        self.NG = Neg(32)
-        self.sigma = nn.Parameter(torch.tensor([1.0] * cascades), requires_grad=True)
-        self.mu = nn.Parameter(torch.tensor([1.0] * cascades), requires_grad=True)
+        self.AE = nn.ModuleList([BasicBlock()] * cascades)
+        self.sigma = nn.Parameter(torch.tensor([1.0] * cascades), requires_grad=False)
+        self.mu = nn.Parameter(torch.tensor([0.0] * cascades), requires_grad=True)
 
     def forward(self, image, sino):
         t = [0] * (self.cascades + 1)
         t[0] = image
-        sparse = 0
         for cascade in range(self.cascades):
             z = t[cascade] + self.ITE[cascade](t[cascade], sino)
-            t[cascade + 1], sp = self.AE[cascade](z, self.sigma[cascade])
-            t[cascade + 1] = self.NG(t[cascade + 1] + self.mu[cascade] * t[cascade])
-            sparse += sp
-        return t, sparse
+            z = self.AE[cascade](z)
+            t[cascade + 1] = t[cascade] + self.mu[cascade] * (t[cascade] - z)
+        return t

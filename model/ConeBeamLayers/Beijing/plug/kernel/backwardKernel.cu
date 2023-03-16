@@ -5,7 +5,7 @@
 
 #define BLOCK_X 16
 #define BLOCK_Y 16
-#define BLOCK_A 16
+#define BLOCK_A 12
 #define PI 3.14159265359
 #define CHECK_CUDA(x) AT_ASSERTM(x.type().is_cuda(), #x " must be a CUDA tensor")
 #define CHECK_CONTIGUOUS(x) AT_ASSERTM(x.is_contiguous(), #x " must be contiguous")
@@ -88,7 +88,7 @@ torch::Tensor backward(torch::Tensor sino, torch::Tensor _volumeSize, torch::Ten
         const dim3 blockSize = dim3(BLOCK_X, BLOCK_Y, 1);
         const dim3 gridSize = dim3(volumeSize.x / BLOCK_X + 1, volumeSize.y / BLOCK_Y + 1, 1);
         for (int angle = 0; angle < angles; angle+=BLOCK_A){
-           backwardKernel<<<gridSize, blockSize>>>(outPtrPitch, volumeSize, detectorSize, (float*)projectVector.data<float>(), angle,angles/64,volumeCenter,detectorCenter);
+           backwardKernel<<<gridSize, blockSize>>>(outPtrPitch, volumeSize, detectorSize, (float*)projectVector.data<float>(), angle,angles,volumeCenter,detectorCenter);
         }
 
       // 解绑纹理

@@ -15,7 +15,7 @@ class DTVFista():
         f = fp = image
         t = 1
         for cascade in range(self.cascades):
-            z = f - 5e-2 * BackProjection.apply(ForwardProjection.apply(f)-sino)
+            z = f - 5e-3 * BackProjection.apply(ForwardProjection.apply(f)-sino)
             z = torch.nn.functional.relu(torch.abs(z) - 5e-4*self.lamb)
             tp = (1+np.sqrt(1+4*t**2))/2
             f = z + (t-1)/tp*(z-fp)

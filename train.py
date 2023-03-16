@@ -16,7 +16,7 @@ trainLoader = DataLoader(trainSet, batch_size=1, shuffle=True)
 validLoader = DataLoader(validSet, batch_size=1, shuffle=False)
 
 device = 0
-net = DTVNet((256,256,64),2).to(device)
+net = DTVNet((256,256,64),5).to(device)
 optimizer = torch.optim.Adam(net.parameters(), lr=10e-4)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.9)
 # dictionary = torch.load(pretrain2)

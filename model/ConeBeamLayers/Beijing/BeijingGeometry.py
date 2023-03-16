@@ -5,7 +5,7 @@ import JITBeijingGeometry as projector
 from options import *
 
 parameters = sco.loadmat(beijingParameterRoot)
-parameters = np.array(parameters["projVec"]).astype(np.float32)
+parameters = np.array(parameters["projection_matrix"]).astype(np.float32)
 parameters = torch.from_numpy(parameters).contiguous()
 volumeSize = torch.IntTensor(beijingVolumeSize)
 detectorSize = torch.IntTensor(beijingSubDetectorSize)
@@ -41,7 +41,7 @@ class BackProjection(torch.autograd.Function):
 class BeijingGeometry(torch.nn.Module):
     def __init__(self):
         super(BeijingGeometry, self).__init__()
-        self.lamb = torch.nn.Parameter(torch.tensor(10e-2), requires_grad=False)
+        self.lamb = 10e-3
 
     def forward(self, x, p):
         residual = ForwardProjection.apply(x) - p

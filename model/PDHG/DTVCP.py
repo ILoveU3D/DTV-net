@@ -1,5 +1,5 @@
 import torch
-from model.ConeBeamLayers.Beijing.BeijingGeometry import ForwardProjection,BackProjection
+from model.ConeBeamLayers.Standard.StandardGeometry import ForwardProjection,BackProjection
 from model.PDHG.Utils.Gradients import spraseMatrixX, spraseMatrixY, spraseMatrixZ, spraseMatrixI, getNormK
 from model.PDHG.Utils.HyperParams import power_method
 from model.PDHG.Utils.L1ball import l1ball
@@ -17,7 +17,7 @@ class DTVCP():
         self.v2 = normH / normDy
         self.v3 = normH / normDz
         self.mu = normH / normI
-        L = 211
+        L = 2110
         print("||K||={}".format(L))
         b = 1
         self.tao = b/L
