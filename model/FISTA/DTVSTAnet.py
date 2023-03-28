@@ -20,10 +20,10 @@ class DTVNet(nn.Module):
         self.dz, self.dzt, normDz = spraseMatrixZ(volumeSize)
         self.dz, self.dzt = nn.Parameter(self.dz, requires_grad=False), nn.Parameter(self.dzt, requires_grad=False)
         # self.sigma = nn.Parameter(torch.tensor([1.0] * 4), requires_grad=False)
-        self.ntx = nn.Parameter(torch.tensor([0.0] * cascades), requires_grad=True)
-        self.nty = nn.Parameter(torch.tensor([0.0] * cascades), requires_grad=True)
-        self.ntz = nn.Parameter(torch.tensor([0.0] * cascades), requires_grad=True)
-        self.nt = nn.Parameter(torch.tensor([0.0] * cascades), requires_grad=True)
+        self.ntx = nn.Parameter(torch.tensor([0.02] * cascades), requires_grad=True)
+        self.nty = nn.Parameter(torch.tensor([0.02] * cascades), requires_grad=True)
+        self.ntz = nn.Parameter(torch.tensor([-0.1] * cascades), requires_grad=True)
+        self.nt = nn.Parameter(torch.tensor([-0.1] * cascades), requires_grad=True)
 
     def forward(self, image, sino):
         t = [torch.tensor(0)] * (self.cascades + 1)

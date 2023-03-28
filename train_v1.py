@@ -7,8 +7,7 @@ from model.FISTA.DTVSTAnet import DTVNet
 from model.FISTA.RegularizationLayers.RED import Red
 from options import trainPath, inputTrainData, validPath, inputValidData, checkpointPath, debugPath, pretrain3
 from loss import draw
-from loss import perceptualLossCal as lossFunction
-lossFunction = torch.nn.L1Loss(reduction="mean")
+from loss import stepLoss as lossFunction
 
 device = 7
 trainSet = Stimulated256Input(trainPath, inputTrainData, device)

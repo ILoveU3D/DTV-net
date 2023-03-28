@@ -5,7 +5,7 @@ from model.ConeBeamLayers.Beijing.BeijingGeometry import ForwardProjection,BackP
 from model.FISTA.FISTA import DTVFista
 from options import outputPath, trainPath
 
-dtv = DTVFista((256, 256, 64), 1500, False)
+dtv = DTVFista((256, 256, 64), 900, False)
 for i in os.listdir("/media/wyk/wyk/Data/result/origin"):
     data = np.fromfile(os.path.join("/media/wyk/wyk/Data/result/origin",i), dtype="float32")
     data = np.reshape(data, [1, 1, 64, 256, 256])

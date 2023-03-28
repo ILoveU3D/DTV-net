@@ -2,19 +2,23 @@ import numpy as np
 import torch
 from tqdm import tqdm
 from torch.utils.data import DataLoader
-from data.simulateLoader import Stimulated256Input
+from data.simulateLoader import Stimulated256InputShepp
 from model.FISTA.FISTAnet import FistaNet
 from options import trainPath, validPath, inputTrainData, inputValidData
 from loss import draw
 # from loss import stepLoss as lossFunction
 lossFunction = torch.nn.L1Loss(reduction =  "mean")
 
-trainSet = Stimulated256Input(trainPath, inputTrainData)
-validSet = Stimulated256Input(validPath, inputValidData)
+device = 1
+trainPath = "/home/nanovision/wyk/data/shepp"
+inputTrainData = "/home/nanovision/wyk/data/sheppInput"
+validPath = "/home/nanovision/wyk/data/shepp"
+inputValidData = "/home/nanovision/wyk/data/sheppInput"
+trainSet = Stimulated256InputShepp(trainPath, inputTrainData)
+validSet = Stimulated256InputShepp(validPath, inputValidData)
 trainLoader = DataLoader(trainSet, batch_size=1, shuffle=True)
 validLoader = DataLoader(validSet, batch_size=1, shuffle=False)
 
-device = 5
 debugPath = "/home/nanovision/wyk/data/debug_fista/"
 checkpointPath = "/home/nanovision/wyk/data/checkpoints_fista/"
 pretrain = "/home/nanovision/wyk/data/checkpoints_fista/fista_net_64485.3274356618.dict"
@@ -59,4 +63,4 @@ for i in range(epoch):
     scheduler.step()
     if i%10==0: torch.save({
         "epoch": i, "model": net.state_dict(), "optimizer": optimizer.state_dict(), "scheduler": scheduler.state_dict()
-    }, "{}/fista_net_{:.10f}.dict".format(checkpointPath, np.mean(np.array(trainLoss))))
+    }, "{}/fista_net_shepp_{:.10f}.dict".format(checkpointPath, np.mean(np.array(trainLoss))))

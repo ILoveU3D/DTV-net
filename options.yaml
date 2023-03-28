@@ -2,14 +2,14 @@
 # train/valid Data Path
 dataPath: /home/nanovision/wyk/data
 subDir:
-  train: trainData
+  train: trainDataCq500
   valid: validData
-  trainInput: inputTrainData
+  trainInput: inputTrainDataCq500
   validInput: inputValidData
 # pretrain
 pretrain: /home/nanovision/wyk/data/checkpoint_real/dtvnet_p2_4146.9211463014.dict
-pretrain2: /home/nanovision/wyk/data/checkpoint_real/dtvnet_l1_39.4115728200.dict
-pretrain3: /home/nanovision/wyk/data/checkpoint_real/dtvnet_v2_2434.5801626966.dict
+pretrain2: /home/nanovision/wyk/data/checkpoint_real/dtvnet_v2.1_1110.9671715963.dict
+pretrain3: /home/nanovision/wyk/data/checkpoint_real/dtvnet_v2.1_17.8781284216.dict
 # checkpoint
 checkpointPath: /home/nanovision/wyk/data/checkpoints/
 # debug
@@ -41,6 +41,6 @@ beijingVolumeSize:
   - 256
   - 256
   - 64
-beijingParameterRoot: /media/wyk/wyk/beijing/projVecSparse.mat
+beijingParameterRoot: /home/nanovision/wyk/data/projVecSparse.mat
 beijingSID: 708
 beijingSDD: 1143

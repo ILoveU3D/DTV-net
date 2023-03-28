@@ -71,8 +71,6 @@ class Stimulated256InputShepp(Dataset):
         input = np.fromfile(self.input[index], "float32")
         input = np.reshape(input, self.scale) * 1000
         input = torch.unsqueeze(torch.from_numpy(input), 0).cuda()
-        img *= self.weight.to(img.device)
-        input *= self.weight.to(input.device)
         img = torch.squeeze(img, 0).cpu()
         input = torch.squeeze(input, 0).cpu()
         proj = torch.squeeze(proj, 0).cpu()
