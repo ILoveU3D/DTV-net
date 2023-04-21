@@ -11,8 +11,8 @@ class FistaNet(nn.Module):
         self.cascades = cascades
         self.ITE = nn.ModuleList([BeijingGeometry()] * cascades)
         self.AE = nn.ModuleList([BasicBlock()] * cascades)
-        self.sigma = nn.Parameter(torch.tensor([1.0] * cascades), requires_grad=False)
-        self.mu = nn.Parameter(torch.tensor([-1.0] * cascades), requires_grad=True)
+        self.sigma = nn.Parameter(torch.tensor([20.0] * cascades), requires_grad=False)
+        self.mu = nn.Parameter(torch.tensor([-0.1] * cascades), requires_grad=True)
 
     def forward(self, image, sino):
         t = [0] * (self.cascades + 1)

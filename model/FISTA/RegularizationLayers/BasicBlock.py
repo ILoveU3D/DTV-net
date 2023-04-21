@@ -35,6 +35,11 @@ class BasicBlock(nn.Module):
         l3 = self.conv3_forward(l2) #64
         l3 = self.relu(l3)
         x_forward = self.conv4_forward(l3) #64
+        
+        #x_forward[...,0:32,:,:,:] = 0
+        #l3[...,:,:,:,:] = 0
+        #l2[...,:,:,:,:] = 0
+        l1[...,:,:,:,:] = 0
 
         l1b = self.conv1_backward(x_forward) #64
         l1b = self.relu(l1b)
@@ -59,4 +64,4 @@ class BasicBlock(nn.Module):
         # prediction output (skip connection); non-negative output
         x_pred = self.relu(x_input + x_G)
 
-        return x_pred
+        return x_pred, x_forward

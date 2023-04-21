@@ -8,6 +8,7 @@ from model.FISTA.RegularizationLayers.RED import Red
 from options import trainPath, inputTrainData, validPath, inputValidData, checkpointPath, debugPath, pretrain3
 from loss import draw
 from loss import stepLoss as lossFunction
+lossFunction = torch.nn.L1Loss(reduction="mean")
 
 device = 7
 trainSet = Stimulated256Input(trainPath, inputTrainData, device)

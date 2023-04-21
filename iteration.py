@@ -35,8 +35,8 @@ class Ivr(Module):
         self.ivr = BeijingGeometry().to(device)
 
     def forward(self, volume, projection):
-        for j in tqdm.trange(400):
-            volume = volume + 1e-3 * self.ivr(volume, projection)
+        for j in tqdm.trange(300):
+            volume = volume + 3 * self.ivr(volume, projection)
         return volume
 
 
@@ -58,7 +58,6 @@ for i, data in enumerate(dataloader):
     result = mdl(volume, projection)
     result.detach().cpu().numpy().tofile(os.path.join(targetPath, files[0]))
     print("infered {}".format(files[0]))
-
 
 # net = BeijingGeometry().cuda().eval()
 # for i in os.listdir(sourcePath):
