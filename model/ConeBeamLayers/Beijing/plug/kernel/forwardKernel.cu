@@ -24,8 +24,8 @@ __global__ void forwardKernel(float* sino, const uint3 volumeSize, const float3 
     float detectorX = detectorIdx.x + detectorCenter.x;
     float detectorY = detectorIdx.y + detectorCenter.y;
 
-    float3 sourcePosition = make_float3(projectVector[index*12], projectVector[index*12+1], projectVector[index*12+2]);
-    float3 detectorPosition = make_float3(projectVector[index*12+3], projectVector[index*12+4], projectVector[index*12+5]);
+    float3 sourcePosition = make_float3(projectVector[index*12], projectVector[index*12+1], -projectVector[index*12+2]);
+    float3 detectorPosition = make_float3(projectVector[index*12+3], projectVector[index*12+4], -projectVector[index*12+5]);
     float3 v = make_float3(projectVector[index*12+6], projectVector[index*12+7], projectVector[index*12+8]);
     float3 u = make_float3(projectVector[index*12+9], projectVector[index*12+10], projectVector[index*12+11]);
 

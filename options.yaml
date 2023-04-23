@@ -33,7 +33,7 @@ standardSDD: 2000
 
 # beijing geometry parameters
 beijingAngleNum: 72 
-beijingPlanes: 64
+beijingPlanes: 21
 beijingSubDetectorSize:
   - 80
   - 144

@@ -35,7 +35,7 @@ class BackProjection(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad):
         device = grad.device
-        sino = projector.forward(grad, volumeSize.to(device), detectorSize.to(device), parameters.to(device), device.index)
+        sino = projector.forward(input, volumeSize.to(device), detectorSize.to(device), parameters.to(device), device.index)
         return sino.reshape(beijingAngleNum, beijingPlanes, beijingSubDetectorSize[1], beijingSubDetectorSize[0]).permute(0,2,1,3).reshape(1, 1, beijingAngleNum*beijingPlanes, beijingSubDetectorSize[1], beijingSubDetectorSize[0])
 
 class BeijingGeometry(torch.nn.Module):

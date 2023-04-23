@@ -6,6 +6,7 @@
 #define BLOCK_X 16
 #define BLOCK_Y 16
 #define BLOCK_A 12
+#define TEXA (21*72)
 #define PI 3.14159265359
 #define CHECK_CUDA(x) AT_ASSERTM(x.type().is_cuda(), #x " must be a CUDA tensor")
 #define CHECK_CONTIGUOUS(x) AT_ASSERTM(x.is_contiguous(), #x " must be contiguous")
@@ -23,9 +24,10 @@ __global__ void backwardKernel(float* volume, const uint3 volumeSize, const uint
 
     for(int k=0;k<volumeSize.z;k++){
         float value = 0.0f;
+        bool found = false;
         for(int angleIdx = index;angleIdx<index+BLOCK_A;angleIdx++){
-            float3 sourcePosition = make_float3(projectVector[angleIdx*12], projectVector[angleIdx*12+1], projectVector[angleIdx*12+2]);
-            float3 detectorPosition = make_float3(projectVector[angleIdx*12+3], projectVector[angleIdx*12+4], projectVector[angleIdx*12+5]);
+            float3 sourcePosition = make_float3(projectVector[angleIdx*12], projectVector[angleIdx*12+1], -projectVector[angleIdx*12+2]);
+            float3 detectorPosition = make_float3(projectVector[angleIdx*12+3], projectVector[angleIdx*12+4], -projectVector[angleIdx*12+5]);
             float3 v = make_float3(projectVector[angleIdx*12+6], projectVector[angleIdx*12+7], projectVector[angleIdx*12+8]);
             float3 u = make_float3(projectVector[angleIdx*12+9], projectVector[angleIdx*12+10], projectVector[angleIdx*12+11]);
             float3 coordinates = make_float3(volumeCenter.x + volumeIdx.x, volumeCenter.y + volumeIdx.y,volumeCenter.z+k);
@@ -33,10 +35,12 @@ __global__ void backwardKernel(float* volume, const uint3 volumeSize, const uint
             float detectorX = fScale * det3(coordinates-sourcePosition,v,sourcePosition-detectorPosition)-detectorCenter.x;
             float detectorY = fScale * det3(u, coordinates-sourcePosition,sourcePosition-detectorPosition)-detectorCenter.y;
             float fr = fScale * det3(u, v, sourcePosition-detectorPosition);
-            value += tex3D(sinoTexture, detectorX, detectorY, angleIdx+0.5f);
+            if(detectorX < -1 || detectorX > volumeSize.x+1 || detectorY < -1 || detectorY > volumeSize.y+1) continue;
+            else found = true;
+            value += tex3D(sinoTexture, detectorX, detectorY, angleIdx%TEXA+0.5f);
         }
         int idx = k * volumeSize.x * volumeSize.y + volumeIdx.y * volumeSize.x + volumeIdx.x;
-        volume[idx] += value * 2 * PI / anglesNum;
+        if(found) volume[idx] += value * 2 * PI / anglesNum;
     }
 }
 
@@ -69,31 +73,32 @@ torch::Tensor backward(torch::Tensor sino, torch::Tensor _volumeSize, torch::Ten
     float3 volumeCenter = make_float3(volumeSize) / -2.0;
     float2 detectorCenter = make_float2(detectorSize) / -2.0;
     for(int batch = 0;batch < sino.size(0); batch++){
-        float* sinoPtrPitch = sinoPtr + detectorSize.x * detectorSize.y * angles * batch;
-        float* outPtrPitch = outPtr + volumeSize.x * volumeSize.y * volumeSize.z * batch;
+        for (int subAngle = 0;subAngle<angles;subAngle+=TEXA){
+            float* sinoPtrPitch = sinoPtr + detectorSize.x * detectorSize.y * subAngle + detectorSize.x * detectorSize.y * angles * batch;
+            float* outPtrPitch = outPtr + volumeSize.x * volumeSize.y * volumeSize.z * batch;
 
-        // 绑定纹理
-        cudaExtent m_extent = make_cudaExtent(detectorSize.x, detectorSize.y, angles);
-        cudaArray *sinoArray;
-        cudaMalloc3DArray(&sinoArray, &channelDesc, m_extent);
-        cudaMemcpy3DParms copyParams = {0};
-        copyParams.srcPtr = make_cudaPitchedPtr((void*)sinoPtrPitch, detectorSize.x*sizeof(float), detectorSize.x, detectorSize.y);
-        copyParams.dstArray = sinoArray;
-        copyParams.kind = cudaMemcpyDeviceToDevice;
-        copyParams.extent = m_extent;
-        cudaMemcpy3D(&copyParams);
-        cudaBindTextureToArray(sinoTexture, sinoArray, channelDesc);
+            // 绑定纹理
+            cudaExtent m_extent = make_cudaExtent(detectorSize.x, detectorSize.y, TEXA);
+            cudaArray *sinoArray;
+            cudaMalloc3DArray(&sinoArray, &channelDesc, m_extent);
+            cudaMemcpy3DParms copyParams = {0};
+            copyParams.srcPtr = make_cudaPitchedPtr((void*)sinoPtrPitch, detectorSize.x*sizeof(float), detectorSize.x, detectorSize.y);
+            copyParams.dstArray = sinoArray;
+            copyParams.kind = cudaMemcpyDeviceToDevice;
+            copyParams.extent = m_extent;
+            cudaMemcpy3D(&copyParams);
+            cudaBindTextureToArray(sinoTexture, sinoArray, channelDesc);
 
-        // 以角度为单位做体素驱动的反投影
-        const dim3 blockSize = dim3(BLOCK_X, BLOCK_Y, 1);
-        const dim3 gridSize = dim3(volumeSize.x / BLOCK_X + 1, volumeSize.y / BLOCK_Y + 1, 1);
-        for (int angle = 0; angle < angles; angle+=BLOCK_A){
-           backwardKernel<<<gridSize, blockSize>>>(outPtrPitch, volumeSize, detectorSize, (float*)projectVector.data<float>(), angle,angles,volumeCenter,detectorCenter);
+            // 以角度为单位做体素驱动的反投影
+            const dim3 blockSize = dim3(BLOCK_X, BLOCK_Y, 1);
+            const dim3 gridSize = dim3(volumeSize.x / BLOCK_X + 1, volumeSize.y / BLOCK_Y + 1, 1);
+            for (int angle = subAngle; angle < subAngle+TEXA; angle+=BLOCK_A){
+               backwardKernel<<<gridSize, blockSize>>>(outPtrPitch, volumeSize, detectorSize, (float*)projectVector.data<float>(), angle, angles/21, volumeCenter, detectorCenter);
+            }
+            // 解绑纹理
+            cudaUnbindTexture(sinoTexture);
+            cudaFreeArray(sinoArray);
         }
-
-      // 解绑纹理
-      cudaUnbindTexture(sinoTexture);
-      cudaFreeArray(sinoArray);
     }
     return out;
 }
