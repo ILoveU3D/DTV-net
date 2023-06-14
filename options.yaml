@@ -7,9 +7,7 @@ subDir:
   trainInput: inputTrainData
   validInput: inputValidData
 # pretrain
-pretrain: /home/nanovision/wyk/data/checkpoint_real/dtvnet_p2_4146.9211463014.dict
-pretrain2: /home/nanovision/wyk/data/checkpoint_real/dtvnet_v2.1_13.8770904042.dict
-pretrain3: /home/nanovision/wyk/data/checkpoint_real/dtvnet_v2.1_918.4269281524.dict
+pretrain3: /home/nanovision/wyk/data/checkpoint_real/dtvnet_v2.6real_20.4602245149.dict
 # checkpoint
 checkpointPath: /home/nanovision/wyk/data/checkpoints/
 # debug
@@ -32,15 +30,17 @@ standardSID: 1000
 standardSDD: 2000
 
 # beijing geometry parameters
-beijingAngleNum: 72 
+beijingAngleNum: 144
 beijingPlanes: 21
 beijingSubDetectorSize:
   - 80
-  - 144
+  - 128
 beijingVolumeSize:
   - 256
   - 256
   - 64
 beijingParameterRoot: /home/nanovision/wyk/data/projVecSparse.mat
+#beijingParameterRoot: /home/nanovision/wyk/data/real/projVecReal_1.mat
 beijingSID: 708
 beijingSDD: 1143
+sampleInterval: 3.5566

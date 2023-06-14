@@ -4,13 +4,14 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 from data.simulateLoader import Stimulated256Input
 from model.FISTA.DTVSTAnet import DTVNet
-from model.FISTA.RegularizationLayers.RED import Red
 from options import trainPath, inputTrainData, validPath, inputValidData, checkpointPath, debugPath, pretrain3
 from loss import draw
 from loss import stepLoss as lossFunction
+import setproctitle
+setproctitle.setproctitle("DTV-net-fusion")
 lossFunction = torch.nn.L1Loss(reduction="mean")
 
-device = 7
+device = 4
 trainSet = Stimulated256Input(trainPath, inputTrainData, device)
 validSet = Stimulated256Input(validPath, inputValidData, device)
 trainLoader = DataLoader(trainSet, batch_size=1, shuffle=True)
@@ -18,7 +19,7 @@ validLoader = DataLoader(validSet, batch_size=1, shuffle=False)
 
 net = DTVNet((256,256,64),5).to(device)
 optimizer = torch.optim.Adam(net.parameters(), lr=10e-4)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.9)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
 # dictionary = torch.load(pretrain3)
 # net.load_state_dict(dictionary["model"])
 # optimizer.load_state_dict(dictionary["optimizer"])
@@ -60,4 +61,4 @@ for i in range(epoch):
     scheduler.step()
     if i%10==0: torch.save({
         "epoch": i, "model": net.state_dict(), "optimizer": optimizer.state_dict(), "scheduler": scheduler.state_dict()
-    }, "{}/dtvnet_v2.1_{:.10f}.dict".format(checkpointPath, np.mean(np.array(trainLoss))))
+    }, "{}/dtvnet_v2.5_{:.10f}.dict".format(checkpointPath, np.mean(np.array(trainLoss))))

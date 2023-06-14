@@ -5,7 +5,7 @@
 
 #define BLOCK_X 16
 #define BLOCK_Y 16
-#define BLOCK_A 12
+#define BLOCK_A 21
 #define TEXA (21*72)
 #define PI 3.14159265359
 #define CHECK_CUDA(x) AT_ASSERTM(x.type().is_cuda(), #x " must be a CUDA tensor")
@@ -37,7 +37,7 @@ __global__ void backwardKernel(float* volume, const uint3 volumeSize, const uint
             float fr = fScale * det3(u, v, sourcePosition-detectorPosition);
             if(detectorX < -1 || detectorX > volumeSize.x+1 || detectorY < -1 || detectorY > volumeSize.y+1) continue;
             else found = true;
-            value += tex3D(sinoTexture, detectorX, detectorY, angleIdx%TEXA+0.5f);
+            value += fr * tex3D(sinoTexture, detectorX, detectorY, angleIdx%TEXA+0.5f);
         }
         int idx = k * volumeSize.x * volumeSize.y + volumeIdx.y * volumeSize.x + volumeIdx.x;
         if(found) volume[idx] += value * 2 * PI / anglesNum;

@@ -4,7 +4,6 @@ import numpy as np
 from model.ConeBeamLayers.Beijing.BeijingGeometry import BeijingGeometry
 from model.PDHG.Utils.Gradients import spraseMatrixX, spraseMatrixY, spraseMatrixZ
 from model.FISTA.RegularizationLayers.BasicBlock import BasicBlock
-from model.FISTA.RegularizationLayers.NEG import Neg
 
 class DTVNet(nn.Module):
     def __init__(self, volumeSize, cascades: int = 3):
@@ -27,30 +26,24 @@ class DTVNet(nn.Module):
         t = [torch.tensor(0)] * (self.cascades + 1)
         t[0] = image
         p = q = s = 0
-        temp = []
         for cascade in range(self.cascades):
             z = t[cascade] + self.ITE(t[cascade], sino)
             pnew = self.__getGradient(z, self.dx)
             qnew = self.__getGradient(z, self.dy)
             snew = self.__getGradient(z, self.dz)
-            pnew, lx = self.AE[0](pnew)
-            qnew, ly = self.AE[1](qnew)
-            snew, lz = self.AE[2](snew)
-            znew, l = self.AE[3](z)
-            p = p + self.ntx[cascade] * (p - pnew)
-            q = q + self.nty[cascade] * (q - qnew)
-            s = s + self.ntz[cascade] * (s - snew)
-            z_ = t[cascade] + self.nt[cascade] * (t[cascade] - znew)
-            p_ = self.__getGradient(p, self.dxt) 
+            p_ = self.AE[0](pnew) - pnew
+            q_ = self.AE[1](qnew) - qnew
+            s_ = self.AE[2](snew) - snew
+            znew = self.AE[3](z)
+            p = p + self.ntx[cascade] * (p - p_)
+            q = q + self.nty[cascade] * (q - q_)
+            s = s + self.ntz[cascade] * (s - s_)
+            z_ = t[cascade] + self.nt[cascade] * (t[cascade] - znew) 
+            p_ = self.__getGradient(p, self.dxt)
             q_ = self.__getGradient(q, self.dyt)
             s_ = self.__getGradient(s, self.dzt)
-            temp.append(p_)
-            temp.append(q_)
-            temp.append(s_)
-            temp.append(z_)
-            t[cascade+1] = p_ + q_ + s_ + z_
+            t[cascade+1] = q_ + p_ + s_ + z_
         return t
-        #return temp
 
     def __getGradient(self, image, sparse):
         result = []
